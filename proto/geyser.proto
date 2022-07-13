@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "mango.v3.geyser";
+option java_outer_classname = "GeyserProto";
+
+package accountsdb;
+
+service AccountsDb {
+  rpc Subscribe(SubscribeRequest) returns (stream Update) {}
+}
+
+message SubscribeRequest {
+}
+
+message Update {
+  oneof update_oneof {
+    AccountWrite account_write = 1;
+    SlotUpdate slot_update = 2;
+    Ping ping = 3;
+    SubscribeResponse subscribe_response = 4;
+  }
+}
+
+message AccountWrite {
+  uint64 slot = 1;
+  bytes pubkey = 2;
+  uint64 lamports = 3;
+  bytes owner = 4;
+  bool executable = 5;
+  uint64 rent_epoch = 6;
+  bytes data = 7;
+  uint64 write_version = 8;
+  // Is this write part of the set of writes sent on startup?
+  bool is_startup = 9;
+  // Is this write sent because it matches the connector criterion?
+  // If false, then it is sent because this address previously matched
+  // the criterion (i.e. account is closed/reused)
+  bool is_selected = 10;
+}
+
+message SlotUpdate {
+  uint64 slot = 1;
+  optional uint64 parent = 2;
+  enum Status {
+    PROCESSED = 0;
+    ROOTED = 1;
+    CONFIRMED = 2;
+  }
+  Status status = 3;
+}
+
+message Ping {
+}
+
+message SubscribeResponse {
+  uint64 highest_write_slot = 1;
+}
